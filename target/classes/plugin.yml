@@ -1,0 +1,13 @@
+name: ChronoCore
+version: '1.0'
+main: me.developer.chronocore.ChronoCore
+api-version: '1.21'
+author: xSnZX
+
+commands:
+  cc:
+    description: to reload the Plugin ( Config.yml ) File.
+  info:
+    description: to show the plugin Info.
+  timeleft:
+    description: to show the player Time Left
