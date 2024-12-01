@@ -1,5 +1,6 @@
 package me.developer.chronocore.Utils;
 
+import me.developer.chronocore.ChronoCore;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,20 +33,24 @@ public class PlayerDataManager {
         }
     }
 
-    public FileConfiguration getConfig() {
-        return config;
-    }
 
-    public void setPlayerTime(UUID uuid, long time) {
-        config.set("PlayerData.Players." + uuid + ".Time", time);
+    public void setPlayerNeededHours(UUID uuid, long time) {
+        config.set("PlayerData.Players." + uuid.toString() + ".needed", time);
+        save();
+    }
+    public void setAchievedSeconds(UUID uuid, long time) {
+        config.set("PlayerData.Players." + uuid.toString() + ".achieved", time);
         save();
     }
 
-    public long getPlayerTime(UUID uuid) {
-        return config.getLong("PlayerData.Players." + uuid + ".Time", 12 * 60 * 60);
+    public long getPlayerNeededHours(UUID uuid) {
+        return config.getLong("PlayerData.Players." + uuid.toString() + ".needed", 3601);
+    }
+    public long getAchievedSeconds(UUID uuid) {
+        return config.getLong("PlayerData.Players." + uuid.toString() + ".achieved", 0);
     }
 
     public boolean hasPlayerTime(UUID uuid) {
-        return config.contains("PlayerData.Players." + uuid + ".Time");
+        return config.contains("PlayerData.Players." + uuid + ".needed");
     }
 }

@@ -1,5 +1,6 @@
 package me.developer.chronocore.Events;
 
+import lombok.Getter;
 import me.developer.chronocore.ChronoCore;
 import me.developer.chronocore.Utils.ColorUtils;
 import me.developer.chronocore.Utils.PlayerDataManager;
@@ -26,9 +27,6 @@ public class PlayerJoinListener implements Listener {
         this.plugin = plugin;
     }
 
-    public Map<UUID, Long> getPlayerTimers() {
-        return playerTimers;
-    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -37,27 +35,38 @@ public class PlayerJoinListener implements Listener {
         String prefix = plugin.prefix;
         FileConfiguration config = plugin.getConfig();
 
-        int defaultTimer = config.getInt("Timer_System.Default_Timer", 12) * 60 * 60;
+        int defaultNeededTime = config.getInt("Timer_System.Default_Timer", 1) * 60 * 60;
 
         if (!playerDataManager.hasPlayerTime(uuid)) {
-            playerDataManager.setPlayerTime(uuid, defaultTimer);
-            playerTimers.put(uuid, (long) defaultTimer);
+            playerDataManager.getPlayerNeededHours(uuid);
+            playerDataManager.setAchievedSeconds(uuid, 0);
+            playerTimers.put(uuid, (long) defaultNeededTime);
+            playerDataManager.setPlayerNeededHours(uuid, defaultNeededTime);
+
             String firstJoinMessage = config.getString("Timer_System.First_Join_Message.Message")
                     .replace("%prefix%", prefix)
-                    .replace("%time%", String.valueOf(defaultTimer / 3600));
+                    .replace("%time%", String.valueOf(defaultNeededTime / 3600));
+
             if (config.getBoolean("Timer_System.First_Join_Message.Enable", true)) {
                 player.sendMessage(ColorUtils.translateColors(firstJoinMessage));
             }
         } else {
-            long remainingTime = playerDataManager.getPlayerTime(uuid);
-            playerTimers.put(uuid, remainingTime);
+            long neededTime = playerDataManager.getPlayerNeededHours(uuid);
+            long achivedTime = playerDataManager.getAchievedSeconds(uuid);
+
+            playerTimers.put(uuid, neededTime);
+
             String normalJoinMessage = config.getString("Timer_System.Normal_Join_Message.Message")
                     .replace("%prefix%", prefix)
-                    .replace("%time-remaining%", String.valueOf(remainingTime / 60));
+                    .replace("%time-remaining%", String.valueOf((neededTime - achivedTime) / 60));
+
             if (config.getBoolean("Timer_System.Normal_Join_Message.Enable", true)) {
                 player.sendMessage(ColorUtils.translateColors(normalJoinMessage));
             }
         }
+
+        ChronoCore.getInstance().getJoinTimes().put(uuid, System.currentTimeMillis());
+        ChronoCore.getInstance().getJoinTimesFixed().put(uuid, System.currentTimeMillis() - (1000*playerDataManager.getAchievedSeconds(uuid)));
     }
 
     @EventHandler
@@ -65,39 +74,16 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        if (playerTimers.containsKey(uuid)) {
-            playerDataManager.setPlayerTime(uuid, playerTimers.get(uuid));
+        if (ChronoCore.getInstance().getJoinTimes().containsKey(uuid)) {
+            long joinTime = ChronoCore.getInstance().getJoinTimes().get(uuid);
+            long timePlayed = (System.currentTimeMillis() - joinTime) / 1000;
+            long achivedTime = playerDataManager.getAchievedSeconds(uuid);
+
+            playerDataManager.setAchievedSeconds(uuid, achivedTime + timePlayed);
             playerTimers.remove(uuid);
+            ChronoCore.getInstance().getJoinTimes().remove(uuid);
+
+            playerDataManager.setAchievedSeconds(uuid, achivedTime + timePlayed);
         }
-    }
-
-    public void startTimerTask() {
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            synchronized (playerTimers) {
-                for (UUID uuid : playerTimers.keySet()) {
-                    long remainingTime = playerTimers.get(uuid);
-
-                    if (remainingTime > 0) {
-                        playerTimers.put(uuid, remainingTime - 1);
-                    } else {
-                        Player player = Bukkit.getPlayer(uuid);
-                        if (player != null && player.isOnline()) {
-                            player.sendMessage(ColorUtils.translateColors(
-                                    plugin.getConfig().getString("Timer_System.Timer_Expired_Message")
-                                            .replace("%prefix%", plugin.prefix)));
-                            Bukkit.getScheduler().runTask(plugin, () -> {
-                                player.setHealth(0.0);
-                                player.setGameMode(GameMode.SPECTATOR);
-                            });
-                        }
-                        playerTimers.remove(uuid);
-                    }
-                }
-            }
-
-            for (Map.Entry<UUID, Long> entry : playerTimers.entrySet()) {
-                playerDataManager.setPlayerTime(entry.getKey(), entry.getValue());
-            }
-        }, 0L, 20L);
     }
 }

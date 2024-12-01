@@ -16,11 +16,9 @@ import java.util.UUID;
 @SuppressWarnings("deprecation")
 public class TimeLeftCommand implements CommandExecutor {
 
-    private final PlayerDataManager playerDataManager;
     private final ChronoCore plugin;
 
-    public TimeLeftCommand(PlayerDataManager playerDataManager, ChronoCore plugin) {
-        this.playerDataManager = playerDataManager;
+    public TimeLeftCommand(ChronoCore plugin) {
         this.plugin = plugin;
     }
 
@@ -34,17 +32,24 @@ public class TimeLeftCommand implements CommandExecutor {
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
 
-        PlayerJoinListener joinListener = plugin.getJoinListener();
-        Map<UUID, Long> playerTimers = joinListener.getPlayerTimers();
+        if (!ChronoCore.getInstance().getJoinTimes().containsKey(uuid)) {
+            player.sendMessage(ChatColor.RED + "ll7en ma d5lt ya 7mar REJOIN lw swet reload");
+            return true;
+        }
 
-        long remainingTime = playerTimers.getOrDefault(uuid, playerDataManager.getPlayerTime(uuid));
+        long neededTime = ChronoCore.getInstance().getPlayerDataManager().getPlayerNeededHours(uuid);
+        System.out.println(neededTime);
+        long joinTime = ChronoCore.getInstance().getJoinTimesFixed().get(uuid);
+        long elapsedTime = (System.currentTimeMillis() - joinTime) / 1000;
+        long remainingTime = neededTime - elapsedTime;
 
         if (remainingTime <= 0) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     plugin.getConfig().getString("Timer_System.No_Time_Left_Message", "&cYou have no time left!")));
         } else {
-            long seconds = remainingTime % 60;
-            long totalMinutes = remainingTime / 60;
+            long totalSeconds = remainingTime;
+            long seconds = totalSeconds % 60;
+            long totalMinutes = totalSeconds / 60;
             long hours = totalMinutes / 60;
             long minutes = totalMinutes % 60;
 

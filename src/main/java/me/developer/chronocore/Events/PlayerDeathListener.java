@@ -30,14 +30,14 @@ public class PlayerDeathListener implements Listener {
             UUID victimUUID = victim.getUniqueId();
             UUID killerUUID = killer.getUniqueId();
 
-            long victimTime = playerDataManager.getPlayerTime(victimUUID) / 60;
-            long killerTime = playerDataManager.getPlayerTime(killerUUID) / 60;
+            long victimTime = playerDataManager.getPlayerNeededHours(victimUUID) / 60;
+            long killerTime = playerDataManager.getPlayerNeededHours(killerUUID) / 60;
 
             if (victimTime > 0) {
                 long stolenTime = Math.min(victimTime, timeToSteal);
 
-                playerDataManager.setPlayerTime(victimUUID, (victimTime - stolenTime) * 60);
-                playerDataManager.setPlayerTime(killerUUID, (killerTime + stolenTime) * 60);
+                playerDataManager.setPlayerNeededHours(victimUUID, (victimTime - stolenTime) * 60);
+                playerDataManager.setPlayerNeededHours(killerUUID, (killerTime + stolenTime) * 60);
 
                 String victimMessage = plugin.getConfig().getString("Timer_System.Kill_Loss_Message",
                         "%prefix% &cYou lost %stolen-time% minute(s) to %killer%!");
@@ -59,11 +59,11 @@ public class PlayerDeathListener implements Listener {
             long timeToSteal = plugin.getConfig().getLong("Timer_System.Kill_Steal_Time", 30);
             UUID victimUUID = victim.getUniqueId();
 
-            long victimTime = playerDataManager.getPlayerTime(victimUUID) / 60;
+            long victimTime = playerDataManager.getPlayerNeededHours(victimUUID) / 60;
 
             if (victimTime > 0) {
                 long stolenTime = Math.min(victimTime, timeToSteal);
-                playerDataManager.setPlayerTime(victimUUID, (victimTime - stolenTime) * 60);
+                playerDataManager.setPlayerNeededHours(victimUUID, (victimTime - stolenTime) * 60);
 
                 String victimMessage = plugin.getConfig().getString("Timer_System.Kill_Loss_Message",
                         "%prefix% &cYou lost %stolen-time% minute(s) to %killer%!");
