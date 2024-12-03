@@ -44,8 +44,8 @@ public class FoodsItemsListener implements Listener {
             if (itemName.equals(ChatColor.translateAlternateColorCodes('&', configName)) &&
                     item.getType() == Material.valueOf(configMaterial)) {
 
-                long currentHdf = playerDataManager.getPlayerNeededHours(uuid);
-                long newTimer = currentHdf + (timeToAdd * 60L);
+                long currentTimer = playerDataManager.getPlayerNeededHours(uuid);
+                long newTimer = currentTimer + (timeToAdd * 60L);
                 playerDataManager.setPlayerNeededHours(uuid, newTimer);
 
                 if (messageEnabled) {

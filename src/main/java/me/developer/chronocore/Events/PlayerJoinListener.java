@@ -1,22 +1,20 @@
 package me.developer.chronocore.Events;
 
-import lombok.Getter;
 import me.developer.chronocore.ChronoCore;
 import me.developer.chronocore.Utils.ColorUtils;
 import me.developer.chronocore.Utils.PlayerDataManager;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
+import org.bukkit.scheduler.BukkitRunnable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("deprecation")
 public class PlayerJoinListener implements Listener {
     private final PlayerDataManager playerDataManager;
     private final Map<UUID, Long> playerTimers = new HashMap<>();
@@ -26,7 +24,6 @@ public class PlayerJoinListener implements Listener {
         this.playerDataManager = playerDataManager;
         this.plugin = plugin;
     }
-
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -66,7 +63,33 @@ public class PlayerJoinListener implements Listener {
         }
 
         ChronoCore.getInstance().getJoinTimes().put(uuid, System.currentTimeMillis());
-        ChronoCore.getInstance().getJoinTimesFixed().put(uuid, System.currentTimeMillis() - (1000*playerDataManager.getAchievedSeconds(uuid)));
+        ChronoCore.getInstance().getJoinTimesFixed().put(uuid, System.currentTimeMillis() - (1000 * playerDataManager.getAchievedSeconds(uuid)));
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline()) {
+                    cancel();
+                    return;
+                }
+
+                long neededTime = ChronoCore.getInstance().getPlayerDataManager().getPlayerNeededHours(uuid);
+                long joinTime = ChronoCore.getInstance().getJoinTimesFixed().get(uuid);
+                long elapsedTime = (System.currentTimeMillis() - joinTime) / 1000;
+                long remainingTime = neededTime - elapsedTime;
+
+                long seconds = remainingTime % 60;
+                long totalMinutes = remainingTime / 60;
+                long hours = totalMinutes / 60;
+                long minutes = totalMinutes % 60;
+
+                String actionBarMessage = plugin.getConfig().getString("Timer_System.Time_Left_ActionBar")
+                        .replace("%hours%", String.valueOf(hours))
+                        .replace("%minutes%", String.valueOf(minutes))
+                        .replace("%seconds%", String.valueOf(seconds));
+                //player.sendActionBar(ColorUtils.translateColors(actionBarMessage));
+            }
+        }.runTaskTimer(plugin, 0L, 20L);
     }
 
     @EventHandler

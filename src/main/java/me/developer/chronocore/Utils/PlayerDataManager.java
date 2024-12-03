@@ -1,6 +1,5 @@
 package me.developer.chronocore.Utils;
 
-import me.developer.chronocore.ChronoCore;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +31,6 @@ public class PlayerDataManager {
             e.printStackTrace();
         }
     }
-
 
     public void setPlayerNeededHours(UUID uuid, long time) {
         config.set("PlayerData.Players." + uuid.toString() + ".needed", time);

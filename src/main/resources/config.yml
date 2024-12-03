@@ -28,8 +28,11 @@ Timer_System:
   Kill_Steal_Time: 30 # Amount of time (in minutes) the killer steals from the victim
   Kill_Loss_Message: "%prefix% &cYou lost %stolen-time% minute(s) to %killer%!"
   Kill_Gain_Message: "%prefix% &aYou gained %stolen-time% minute(s) from %victim%!"
+  Loss_Time_Message: "%prefix% &cYou lost %time% minute(s)!"
+  Turn_to_Ghost: "%prefix% &cYou have been turned to Ghost!"
   #
   Time_Left_Message: "%prefix% &aYou have %hours% hour(s) and %minutes% minute(s) and %seconds% second(s) left."
+  Time_Left_ActionBar: "&a%hours% hour(s)/%minutes% minute(s)/%seconds% second(s) left"
   No_Time_Left_Message: "%prefix% &cYou have no time left!"
   Default_Timer: 1 # 1 hour(s)
   First_Join_Message:
@@ -57,3 +60,42 @@ Timer_System:
         Add-Timer-Message:
           Enable: true
           Message: "%prefix% &aYou've been given extra %extra-timer% minute(s) to live!"
+
+Mobs_Drops:
+  Mobs:
+    ZOMBIE:
+      Items:
+        Item1:
+          Item-Name: "&e&lTime &6&lMeat"
+          Item-Material: BEEF
+          Chance-to-Drops: 20
+    SPIDER:
+      Items:
+        Item1:
+          Item-Name: "&e&lTime &6&lMeat"
+          Item-Material: BEEF
+          Chance-to-Drops: 50
+
+Revive_Recipe:
+  Item-Name: "&7Ghost Revive"
+  Item-Material: BOOK
+  Item-Lore:
+    - " "
+    - "&7Use this item to revive your friends!"
+    - "&7and turn them back to humans."
+    - " "
+  Recipe:
+    - "AMA"
+    - "NCN"
+    - "AMA"
+  Recipe-Items:
+    N: "NETHERITE_INGOT"
+    M: "BEEF"
+    A: "AMETHYST_SHARD"
+    C: "CLOCK"
+
+Revive_Item:
+  Type_Player_Name_Message: "%prefix% &aType the name of the player you want to revive in chat."
+  Invalid_Player: "%prefix% &cInvalid target! Make sure the player is online and in spectator mode."
+  Revived_Successfully: "%prefix% &aYou have successfully revived %target%!"
+  Revived_Successfully_by_Player: "%prefix% &aYou have been revived by %player%!"
